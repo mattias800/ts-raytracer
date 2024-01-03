@@ -41,9 +41,9 @@ export const drawColorSamples = (
   samplesPerPixel: number,
 ) => {
   const scale = 1.0 / samplesPerPixel;
-  const r = color.r * scale;
-  const g = color.g * scale;
-  const b = color.b * scale;
+  const r = linearToGamma(color.r * scale);
+  const g = linearToGamma(color.g * scale);
+  const b = linearToGamma(color.b * scale);
 
   const intensity = new Interval(0, 0.999);
 
@@ -56,3 +56,6 @@ export const drawColorSamples = (
     color.a != null ? 256 * intensity.clamp(color.a) : undefined,
   );
 };
+
+const linearToGamma = (linearComponent: number): number =>
+  Math.sqrt(linearComponent);

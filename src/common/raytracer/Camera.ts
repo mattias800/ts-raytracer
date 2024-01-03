@@ -1,6 +1,6 @@
 import { HitRecord, Hittable } from "./hittables/Hittable.ts";
 import { Ray } from "./Ray.ts";
-import { Color } from "./Color.ts";
+import { Color, colors } from "./Color.ts";
 import { Interval } from "./Interval.ts";
 import { lerpColor } from "./Lerp.ts";
 import { Vec3 } from "./Vec3.ts";
@@ -9,9 +9,11 @@ import { drawColorSamples } from "../canvas/Canvas.ts";
 export class Camera {
   public aspectRatio = 16.0 / 9.0;
   public imageWidth = 400;
-  public samplesPerPixel = 10;
+  public samplesPerPixel = 100;
+  public maxDepth = 10;
 
   render(world: Hittable) {
+    const start = new Date().getTime();
     this.initialize();
 
     for (let j = 0; j < this.imageHeight; ++j) {
@@ -20,12 +22,14 @@ export class Camera {
 
         for (let sample = 0; sample < this.samplesPerPixel; sample++) {
           const r = this.getRay(i, j);
-          pixelColor = pixelColor.add(this.rayColor(r, world));
+          pixelColor = pixelColor.add(this.rayColor(r, this.maxDepth, world));
         }
 
         drawColorSamples(i, j, pixelColor, this.samplesPerPixel);
       }
     }
+    const end = new Date().getTime();
+    console.log("Render took " + (end - start) + " ms.");
   }
 
   private imageHeight: number = 0;
@@ -80,14 +84,25 @@ export class Camera {
       .add(this.pixelDeltaV.multiplyByNum(py));
   }
 
-  rayColor(r: Ray, world: Hittable): Color {
+  rayColor(r: Ray, depth: number, world: Hittable): Color {
+    if (depth <= 0) {
+      return colors.black;
+    }
+
     const rec = HitRecord.init();
 
-    if (world.hit(r, new Interval(0, Infinity), rec)) {
-      return rec.normal
-        .toColor()
-        .add(new Color(1, 1, 1))
-        .multiplyByNum(0.5);
+    if (world.hit(r, new Interval(0.001, Infinity), rec)) {
+      const direction = rec.normal.add(Vec3.randomUnitVector());
+
+      return this.rayColor(
+        new Ray(rec.point, direction),
+        depth - 1,
+        world,
+      ).multiplyByNum(0.5);
+      // return rec.normal
+      //   .toColor()
+      //   .add(new Color(1, 1, 1))
+      //   .multiplyByNum(0.5);
     }
 
     const unitDirection = r.direction.unitVector();

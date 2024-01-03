@@ -1,4 +1,5 @@
 import { Color } from "./Color.ts";
+import { getRandom } from "./MathUtils.ts";
 
 export class Vec3 {
   private readonly _x: number;
@@ -25,6 +26,36 @@ export class Vec3 {
 
   get z(): number {
     return this._z;
+  }
+
+  static random(min: number, max: number): Vec3 {
+    return new Vec3(
+      getRandom(min, max),
+      getRandom(min, max),
+      getRandom(min, max),
+    );
+  }
+
+  static randomInUnitSphere() {
+    while (true) {
+      const p = Vec3.random(-1, 1);
+      if (p.lengthSquared() < 1) {
+        return p;
+      }
+    }
+  }
+
+  static randomUnitVector() {
+    return this.randomInUnitSphere().unitVector();
+  }
+
+  static randomOnHemisphere(normal: Vec3): Vec3 {
+    const onUnitSphere = this.randomUnitVector();
+    if (onUnitSphere.dot(normal) > 0.0) {
+      return onUnitSphere;
+    } else {
+      return onUnitSphere.negative();
+    }
   }
 
   negative(): Vec3 {

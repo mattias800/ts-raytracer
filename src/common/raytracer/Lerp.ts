@@ -11,8 +11,9 @@ export const lerpVec3 = (start: Vec3, end: Vec3, a: number): Vec3 =>
     lerp(start.z, end.z, a),
   );
 
-export const lerpColor = (start: Color, end: Color, a: number): Color => ({
-  r: lerp(start.r, end.r, a),
-  g: lerp(start.g, end.g, a),
-  b: lerp(start.b, end.b, a),
-});
+export const lerpColor = (start: Color, end: Color, a: number): Color =>
+  new Color(
+    lerp(start.r, end.r, a),
+    lerp(start.g, end.g, a),
+    lerp(start.b, end.b, a),
+  );
