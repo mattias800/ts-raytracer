@@ -26,7 +26,11 @@ export class Dielectric implements Material {
 
     const cannotRefract = refractionRatio * sinTheta > 1.0;
 
-    const direction = cannotRefract
+    const shouldReflect =
+      cannotRefract ||
+      this.reflectance(cosTheta, refractionRatio) > Math.random();
+
+    const direction = shouldReflect
       ? unitDirection.reflect(rec.normal)
       : unitDirection.refract(rec.normal, refractionRatio);
 
@@ -34,5 +38,11 @@ export class Dielectric implements Material {
     scattered.direction = direction;
 
     return true;
+  }
+
+  reflectance(cosine: number, refIdx: number): number {
+    let r0 = (1 - refIdx) / (1 + refIdx);
+    r0 = r0 * r0;
+    return r0 + (1 - r0) * Math.pow(1 - cosine, 5);
   }
 }
