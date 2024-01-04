@@ -1,13 +1,13 @@
 import { Hittable } from "./Hittable.ts";
 import { Ray } from "../Ray.ts";
 import { Interval } from "../Interval.ts";
-import {HitRecord} from "./HitRecord.ts";
+import { HitRecord } from "./HitRecord.ts";
 
 export class HittableList implements Hittable {
   private objects: Array<Hittable>;
 
-  constructor(objects: Array<Hittable>) {
-    this.objects = objects;
+  constructor(objects?: Array<Hittable>) {
+    this.objects = objects ?? [];
   }
 
   clear() {

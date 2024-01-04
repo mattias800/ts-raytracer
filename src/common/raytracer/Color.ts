@@ -1,3 +1,5 @@
+import { getRandom } from "./MathUtils.ts";
+
 export class Color {
   private _r: number;
   private _g: number;
@@ -60,6 +62,14 @@ export class Color {
     this.g = v.g;
     this.b = v.b;
     this.a = v.a;
+  }
+
+  static random(min: number = 0, max: number = 1): Color {
+    return new Color(
+      getRandom(min, max),
+      getRandom(min, max),
+      getRandom(min, max),
+    );
   }
 }
 

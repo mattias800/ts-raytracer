@@ -13,7 +13,7 @@ export const RaytracerPanel: React.FC<RaytracerPanelProps> = () => {
 
   return (
     <div style={{ padding: "2rem" }}>
-      <canvas id={"ray-canvas"} width={400} height={225}></canvas>
+      <canvas id={"ray-canvas"} width={1200} height={675}></canvas>
     </div>
   );
 };

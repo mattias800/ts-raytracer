@@ -7,6 +7,7 @@ import { Vec3 } from "./Vec3.ts";
 import { drawColorSamples } from "../canvas/Canvas.ts";
 import { HitRecord } from "./hittables/HitRecord.ts";
 import { degreesToRadians } from "./MathUtils.ts";
+import { getProgressAsPercent } from "./Progress.ts";
 
 export class Camera {
   public aspectRatio = 16.0 / 9.0;
@@ -23,20 +24,25 @@ export class Camera {
   public focusDistance = 10; // Distance from the camera lookFrom point to plane of perfect focus
 
   render(world: Hittable) {
-    const start = new Date().getTime();
     this.initialize();
 
+    const start = new Date().getTime();
     for (let j = 0; j < this.imageHeight; ++j) {
-      for (let i = 0; i < this.imageWidth; ++i) {
-        let pixelColor = new Color(0, 0, 0);
+      setTimeout(() => {
+        for (let i = 0; i < this.imageWidth; ++i) {
+          let pixelColor = new Color(0, 0, 0);
 
-        for (let sample = 0; sample < this.samplesPerPixel; sample++) {
-          const r = this.getRay(i, j);
-          pixelColor = pixelColor.add(this.rayColor(r, this.maxDepth, world));
+          for (let sample = 0; sample < this.samplesPerPixel; sample++) {
+            const r = this.getRay(i, j);
+            pixelColor = pixelColor.add(this.rayColor(r, this.maxDepth, world));
+          }
+
+          drawColorSamples(i, j, pixelColor, this.samplesPerPixel);
         }
-
-        drawColorSamples(i, j, pixelColor, this.samplesPerPixel);
-      }
+        console.log(
+          "Progress: " + getProgressAsPercent(j, this.imageHeight),
+        );
+      }, 0);
     }
     const end = new Date().getTime();
     console.log("Render took " + (end - start) + " ms.");
