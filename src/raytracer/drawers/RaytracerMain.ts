@@ -26,6 +26,8 @@ export const main = () => {
   cam.lookFrom = new Vec3(-2, 2, 1);
   cam.lookAt = new Vec3(0, 0, -1);
   cam.vup = new Vec3(0, 1, 0);
+  cam.defocusAngle = 10.0;
+  cam.focusDistance = 3.4;
 
   cam.render(world);
 };

@@ -110,6 +110,14 @@ export class Vec3 {
     return this.divideByNum(this.length());
   }
 
+  static randomInUnitDisk() {
+    while (true) {
+      const p = new Vec3(getRandom(-1, 1), getRandom(-1, 1), 0);
+      if (p.lengthSquared() < 1) {
+        return p;
+      }
+    }
+  }
   nearZero(): boolean {
     // Return true if the vector is close to zero in all dimensions.
     const s = 1e-8;

@@ -19,6 +19,9 @@ export class Camera {
   public lookAt = new Vec3(0, 0, 0);
   public vup = new Vec3(0, 1, 0);
 
+  public defocusAngle = 0; // Variation angle of rays through each pixel
+  public focusDistance = 10; // Distance from the camera lookFrom point to plane of perfect focus
+
   render(world: Hittable) {
     const start = new Date().getTime();
     this.initialize();
@@ -49,14 +52,16 @@ export class Camera {
   private v = Vec3.zero();
   private w = Vec3.zero();
 
+  private defocusDiskU = Vec3.zero();
+  private defocusDiskV = Vec3.zero();
+
   initialize() {
     this.imageHeight = Math.max(1, this.imageWidth / this.aspectRatio);
     this.center = this.lookFrom;
 
-    const focalLength = this.lookFrom.sub(this.lookAt).length();
     const theta = degreesToRadians(this.vfov);
     const h = Math.tan(theta / 2);
-    const viewportHeight = 2.0 * h * focalLength;
+    const viewportHeight = 2.0 * h * this.focusDistance;
     const viewportWidth = viewportHeight * (this.imageWidth / this.imageHeight);
 
     // Calculate the u,v,w unit basis vectors from the camera coordinate frame.
@@ -67,30 +72,49 @@ export class Camera {
     const viewportU = this.u.multiplyByNum(viewportWidth);
     const viewportV = this.v.negative().multiplyByNum(viewportHeight);
 
+    // Calculate the horizontal and vertical delta vectors to the next pixel.
     this.pixelDeltaU = viewportU.divideByNum(this.imageWidth);
     this.pixelDeltaV = viewportV.divideByNum(this.imageHeight);
 
+    // Calculate the location of the upper left pixel.
     const viewportUpperLeft = this.center
-      .sub(this.w.multiplyByNum(focalLength))
+      .sub(this.w.multiplyByNum(this.focusDistance))
       .sub(viewportU.divideByNum(2))
       .sub(viewportV.divideByNum(2));
 
     this.pixel00Loc = viewportUpperLeft.add(
       this.pixelDeltaU.add(this.pixelDeltaV).multiplyByNum(0.5),
     );
+
+    // Calculate the camera defocus disk basis vectors
+    const defocusRadius =
+      this.focusDistance * Math.tan(degreesToRadians(this.defocusAngle / 2));
+    this.defocusDiskU = this.u.multiplyByNum(defocusRadius);
+    this.defocusDiskV = this.v.multiplyByNum(defocusRadius);
   }
 
   getRay(i: number, j: number): Ray {
+    // Get a randomly-sampled camera ray for the pixel at location i,j,
+    // originating from the camera defocus disk.
+
     const pixelCenter = this.pixel00Loc
       .add(this.pixelDeltaU.multiplyByNum(i))
       .add(this.pixelDeltaV.multiplyByNum(j));
 
     const pixelSample = pixelCenter.add(this.pixelSampleSquare());
 
-    const rayOrigin = this.center;
+    const rayOrigin =
+      this.defocusAngle <= 0 ? this.center : this.defocusDiskSample();
     const rayDirection = pixelSample.sub(rayOrigin);
 
     return new Ray(rayOrigin, rayDirection);
+  }
+
+  defocusDiskSample(): Vec3 {
+    const p = Vec3.randomInUnitDisk();
+    return this.center
+      .add(this.defocusDiskU.multiplyByNum(p.x))
+      .add(this.defocusDiskV.multiplyByNum(p.y));
   }
 
   pixelSampleSquare(): Vec3 {
