@@ -5,12 +5,13 @@ import { Camera } from "../../common/raytracer/Camera.ts";
 import { Metal } from "../../common/raytracer/materials/Metal.ts";
 import { Lambertian } from "../../common/raytracer/materials/Lambertian.ts";
 import { Color } from "../../common/raytracer/Color.ts";
+import {Dielectric} from "../../common/raytracer/materials/Dielectric.ts";
 
 export const main = () => {
   const materialGround = new Lambertian(new Color(0.8, 0.8, 0.0));
-  const materialCenter = new Lambertian(new Color(0.7, 0.3, 0.3));
-  const materialLeft = new Metal(new Color(0.8, 0.8, 0.8), 0.3);
-  const materialRight = new Metal(new Color(0.8, 0.6, 0.2), 1.0);
+  const materialCenter = new Lambertian(new Color(0.1, 0.2, 0.5));
+  const materialLeft = new Dielectric(1.5);
+  const materialRight = new Metal(new Color(0.8, 0.6, 0.2), 0.0);
 
   const world = new HittableList([
     new Sphere(new Vec3(0.0, -100.5, -1.0), 100, materialGround),

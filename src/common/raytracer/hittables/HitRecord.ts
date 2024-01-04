@@ -55,6 +55,10 @@ export class HitRecord {
     this._material = value;
   }
 
+  get frontFace(): boolean {
+    return this._frontFace;
+  }
+
   setAll(v: HitRecord): void {
     this._point = v.point;
     this._normal = v.normal;

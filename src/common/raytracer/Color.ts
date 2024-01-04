@@ -65,10 +65,12 @@ export class Color {
 
 interface Colors {
   black: Color;
+  white: Color;
   red: Color;
 }
 
 export const colors: Colors = {
   black: new Color(0, 0, 0),
+  white: new Color(1, 1, 1),
   red: new Color(1, 0, 0),
 };

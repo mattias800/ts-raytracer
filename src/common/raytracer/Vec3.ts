@@ -122,6 +122,17 @@ export class Vec3 {
     return this.sub(right);
   }
 
+  refract(n: Vec3, etaiOverEtat: number): Vec3 {
+    const cosTheta = Math.min(this.negative().dot(n), 1.0);
+    const rOutPerp = this.add(n.multiplyByNum(cosTheta)).multiplyByNum(
+      etaiOverEtat,
+    );
+    const rOutParallel = n.multiplyByNum(
+      -Math.sqrt(Math.abs(1.0 - rOutPerp.lengthSquared())),
+    );
+    return rOutPerp.add(rOutParallel);
+  }
+
   toColor(): Color {
     return new Color(this._x, this._y, this._z);
   }
