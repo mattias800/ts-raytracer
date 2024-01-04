@@ -6,12 +6,18 @@ import { lerpColor } from "./Lerp.ts";
 import { Vec3 } from "./Vec3.ts";
 import { drawColorSamples } from "../canvas/Canvas.ts";
 import { HitRecord } from "./hittables/HitRecord.ts";
+import { degreesToRadians } from "./MathUtils.ts";
 
 export class Camera {
   public aspectRatio = 16.0 / 9.0;
   public imageWidth = 400;
   public samplesPerPixel = 100;
   public maxDepth = 10;
+
+  public vfov = 90; // Vertical FOV
+  public lookFrom = new Vec3(0, 0, -1);
+  public lookAt = new Vec3(0, 0, 0);
+  public vup = new Vec3(0, 1, 0);
 
   render(world: Hittable) {
     const start = new Date().getTime();
@@ -33,28 +39,39 @@ export class Camera {
     console.log("Render took " + (end - start) + " ms.");
   }
 
-  private imageHeight: number = 0;
-  private center = Vec3.zero();
-  private pixel00Loc = Vec3.zero();
-  private pixelDeltaU = Vec3.zero();
-  private pixelDeltaV = Vec3.zero();
+  private imageHeight: number = 0; // Rendered image height
+  private center = Vec3.zero(); // Camera center
+  private pixel00Loc = Vec3.zero(); // Location of pixel 0,0
+  private pixelDeltaU = Vec3.zero(); // Offset to pixel to the right
+  private pixelDeltaV = Vec3.zero(); // Offset to pixel below
+
+  private u = Vec3.zero(); // Camera frame basis vectors
+  private v = Vec3.zero();
+  private w = Vec3.zero();
 
   initialize() {
     this.imageHeight = Math.max(1, this.imageWidth / this.aspectRatio);
-    this.center = new Vec3(0, 0, 0);
+    this.center = this.lookFrom;
 
-    const focalLength = 1.0;
-    const viewportHeight = 2.0;
+    const focalLength = this.lookFrom.sub(this.lookAt).length();
+    const theta = degreesToRadians(this.vfov);
+    const h = Math.tan(theta / 2);
+    const viewportHeight = 2.0 * h * focalLength;
     const viewportWidth = viewportHeight * (this.imageWidth / this.imageHeight);
 
-    const viewportU = new Vec3(viewportWidth, 0, 0);
-    const viewportV = new Vec3(0, -viewportHeight, 0);
+    // Calculate the u,v,w unit basis vectors from the camera coordinate frame.
+    this.w = this.lookFrom.sub(this.lookAt).unitVector();
+    this.u = this.vup.cross(this.w).unitVector();
+    this.v = this.w.cross(this.u);
+
+    const viewportU = this.u.multiplyByNum(viewportWidth);
+    const viewportV = this.v.negative().multiplyByNum(viewportHeight);
 
     this.pixelDeltaU = viewportU.divideByNum(this.imageWidth);
     this.pixelDeltaV = viewportV.divideByNum(this.imageHeight);
 
     const viewportUpperLeft = this.center
-      .sub(new Vec3(0, 0, focalLength))
+      .sub(this.w.multiplyByNum(focalLength))
       .sub(viewportU.divideByNum(2))
       .sub(viewportV.divideByNum(2));
 

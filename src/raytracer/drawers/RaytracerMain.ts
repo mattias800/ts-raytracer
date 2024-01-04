@@ -2,10 +2,10 @@ import { Vec3 } from "../../common/raytracer/Vec3.ts";
 import { HittableList } from "../../common/raytracer/hittables/HittableList.ts";
 import { Sphere } from "../../common/raytracer/hittables/Sphere.ts";
 import { Camera } from "../../common/raytracer/Camera.ts";
-import { Metal } from "../../common/raytracer/materials/Metal.ts";
 import { Lambertian } from "../../common/raytracer/materials/Lambertian.ts";
 import { Color } from "../../common/raytracer/Color.ts";
-import {Dielectric} from "../../common/raytracer/materials/Dielectric.ts";
+import { Metal } from "../../common/raytracer/materials/Metal.ts";
+import { Dielectric } from "../../common/raytracer/materials/Dielectric.ts";
 
 export const main = () => {
   const materialGround = new Lambertian(new Color(0.8, 0.8, 0.0));
@@ -14,7 +14,7 @@ export const main = () => {
   const materialRight = new Metal(new Color(0.8, 0.6, 0.2), 0.0);
 
   const world = new HittableList([
-    new Sphere(new Vec3(0.0, -100.5, -1.0), 100, materialGround),
+    new Sphere(new Vec3(0.0, -100.5, -1.0), 100.0, materialGround),
     new Sphere(new Vec3(0.0, 0.0, -1.0), 0.5, materialCenter),
     new Sphere(new Vec3(-1.0, 0.0, -1.0), 0.5, materialLeft),
     new Sphere(new Vec3(-1.0, 0.0, -1.0), -0.4, materialLeft),
@@ -22,5 +22,10 @@ export const main = () => {
   ]);
 
   const cam = new Camera();
+  cam.vfov = 20;
+  cam.lookFrom = new Vec3(-2, 2, 1);
+  cam.lookAt = new Vec3(0, 0, -1);
+  cam.vup = new Vec3(0, 1, 0);
+
   cam.render(world);
 };
