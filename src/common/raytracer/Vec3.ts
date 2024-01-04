@@ -110,6 +110,18 @@ export class Vec3 {
     return this.divideByNum(this.length());
   }
 
+  nearZero(): boolean {
+    // Return true if the vector is close to zero in all dimensions.
+    const s = 1e-8;
+    return Math.abs(this.x) < s && Math.abs(this.y) < s && Math.abs(this.z) < s;
+  }
+
+  reflect(n: Vec3): Vec3 {
+    // v - 2*dot(v,n)*n
+    const right = n.multiplyByNum(2 * this.dot(n));
+    return this.sub(right);
+  }
+
   toColor(): Color {
     return new Color(this._x, this._y, this._z);
   }

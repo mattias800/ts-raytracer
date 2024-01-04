@@ -1,6 +1,7 @@
-import { HitRecord, Hittable } from "./Hittable.ts";
+import { Hittable } from "./Hittable.ts";
 import { Ray } from "../Ray.ts";
 import { Interval } from "../Interval.ts";
+import {HitRecord} from "./HitRecord.ts";
 
 export class HittableList implements Hittable {
   private objects: Array<Hittable>;

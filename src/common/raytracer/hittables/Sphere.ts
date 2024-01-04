@@ -1,15 +1,19 @@
-import { HitRecord, Hittable } from "./Hittable.ts";
+import { Hittable } from "./Hittable.ts";
 import { Ray } from "../Ray.ts";
 import { Vec3 } from "../Vec3.ts";
-import {Interval} from "../Interval.ts";
+import { Interval } from "../Interval.ts";
+import { HitRecord } from "./HitRecord.ts";
+import { Material } from "../materials/Material.ts";
 
 export class Sphere implements Hittable {
   private _center: Vec3;
   private _radius: number;
+  private _material: Material;
 
-  constructor(center: Vec3, radius: number) {
+  constructor(center: Vec3, radius: number, material: Material) {
     this._center = center;
     this._radius = radius;
+    this._material = material;
   }
 
   get center(): Vec3 {
@@ -26,6 +30,14 @@ export class Sphere implements Hittable {
 
   set radius(value: number) {
     this._radius = value;
+  }
+
+  get material(): Material {
+    return this._material;
+  }
+
+  set material(value: Material) {
+    this._material = value;
   }
 
   hit(r: Ray, rayT: Interval, rec: HitRecord): boolean {
@@ -55,6 +67,7 @@ export class Sphere implements Hittable {
     rec.normal = rec.point.sub(this._center).divideByNum(this._radius);
     const outwardNormal = rec.point.sub(this._center).divideByNum(this._radius);
     rec.setFaceNormal(r, outwardNormal);
+    rec.material = this.material;
 
     return true;
   }

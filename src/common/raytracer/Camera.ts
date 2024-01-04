@@ -1,10 +1,11 @@
-import { HitRecord, Hittable } from "./hittables/Hittable.ts";
+import { Hittable } from "./hittables/Hittable.ts";
 import { Ray } from "./Ray.ts";
 import { Color, colors } from "./Color.ts";
 import { Interval } from "./Interval.ts";
 import { lerpColor } from "./Lerp.ts";
 import { Vec3 } from "./Vec3.ts";
 import { drawColorSamples } from "../canvas/Canvas.ts";
+import { HitRecord } from "./hittables/HitRecord.ts";
 
 export class Camera {
   public aspectRatio = 16.0 / 9.0;
@@ -92,17 +93,14 @@ export class Camera {
     const rec = HitRecord.init();
 
     if (world.hit(r, new Interval(0.001, Infinity), rec)) {
-      const direction = rec.normal.add(Vec3.randomUnitVector());
+      const scattered = Ray.init();
+      const attenuation = new Color(0, 0, 0);
 
-      return this.rayColor(
-        new Ray(rec.point, direction),
-        depth - 1,
-        world,
-      ).multiplyByNum(0.5);
-      // return rec.normal
-      //   .toColor()
-      //   .add(new Color(1, 1, 1))
-      //   .multiplyByNum(0.5);
+      if (rec.material.scatter(r, rec, attenuation, scattered)) {
+        return this.rayColor(scattered, depth - 1, world).multiply(attenuation);
+      }
+
+      return new Color(0, 0, 0);
     }
 
     const unitDirection = r.direction.unitVector();
